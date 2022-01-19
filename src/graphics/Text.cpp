@@ -28,62 +28,103 @@ void Text::draw(const std::unique_ptr<Font>& font, const std::string& text, floa
     glBindTexture(GL_TEXTURE_2D, font->textureId);
     glBindVertexArray(vao);
 
-    std::vector<glm::vec4> vertices;
-
     for (const auto& c : text) {
-        const auto& glyph = font->glyphs.at(c);
+        const auto it = font->glyphs.find(c);
+        const auto& glyph = it != font->glyphs.end() ? it->second : font->glyphs.at(127);
 
-        float x2 = x + glyph.bearing.x * scale;
-        float y2 = -y - glyph.bearing.y * scale;
+        float px = x + glyph.bearing.x * scale;
+        float py = y - (glyph.size.y - glyph.bearing.y) * scale;
+        float ox = glyph.size.x / font->width;
+        float oy = glyph.size.y / font->height;
+        float tx = glyph.uv.x;
+        float ty = glyph.uv.y;
+
         float w = glyph.size.x * scale;
         float h = glyph.size.y * scale;
 
-        vertices.emplace_back(
-            x2,
-            -y2,
-            glyph.uv.x,
-            glyph.uv.y
-        );
+        /*float vertices[6][4] = {
+            {
+                px,
+                py + h,
+                tx,
+                ty
+            },
+            {
+                px,
+                py,
+                tx,
+                ty + oy
+            },
+            {
+                px + w,
+                py,
+                tx + ox,
+                ty + oy
+            },
+            {
+                px,
+                py + h,
+                tx,
+                ty
+            },
+            {
+                px + w,
+                py,
+                tx + ox,
+                ty + oy
+            },
+            {
+                px + w,
+                py + h,
+                tx + ox,
+                ty
+            }
+        };*/
 
-        vertices.emplace_back(
-            x2 + w,
-            -y2,
-            glyph.uv.x + glyph.size.x / font->width,
-            glyph.uv.y
-        );
+        float vertices[6][4] = {
+            {
+                px,
+                py + h,
+                tx,
+                ty
+            },
+            {
+                px + w,
+                py,
+                tx + ox,
+                ty + oy
+            },
+            {
+                px,
+                py,
+                tx,
+                ty + oy
+            },
+            {
+                px,
+                py + h,
+                tx,
+                ty
+            },
+            {
+                px + w,
+                py + h,
+                tx + ox,
+                ty
+            },
+            {
+                px + w,
+                py,
+                tx + ox,
+                ty + oy
+            }
+        };
 
-        vertices.emplace_back(
-            x2,
-            -y2 - h,
-            glyph.uv.x,
-            glyph.uv.y + glyph.size.y / font->height
-        );
-
-        vertices.emplace_back(
-            x2 + w,
-            -y2,
-            glyph.uv.x + glyph.size.x / font->width,
-            glyph.uv.y
-        );
-
-        vertices.emplace_back(
-            x2,
-            -y2 - h,
-            glyph.uv.x,
-            glyph.uv.y + glyph.size.y / font->height
-        );
-
-        vertices.emplace_back(
-            x2 + w,
-            -y2 - h,
-            glyph.uv.x + glyph.size.x / font->width,
-            glyph.uv.y + glyph.size.y / font->height
-        );
-
-        // update content of VBO memory
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * sizeof(glm::vec4), vertices.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, 6 * sizeof(glm::vec4), &vertices);
         glDrawArrays(GL_TRIANGLES, 0, 6);
+
+        x += glyph.advance.x * scale;
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

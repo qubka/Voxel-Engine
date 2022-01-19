@@ -3,7 +3,7 @@
 
 Texture::Texture(const std::filesystem::path& path, bool linear, bool clamp) : filePath(path) {
     Image image{path};
-    GLenum internalFormat = GL_RED, dataFormat = GL_RED;
+    GLenum internalFormat = GL_R8, dataFormat = GL_RED;
     switch (image.channels) {
         case 3:
             internalFormat = GL_RGB8;
@@ -40,6 +40,8 @@ Texture::Texture(const std::filesystem::path& path, bool linear, bool clamp) : f
     glGenerateMipmap(GL_TEXTURE_2D);
 
     glBindTexture(GL_TEXTURE_2D, 0);
+
+    std::cout << glGetError() << std::endl;
 }
 
 Texture::Texture(unsigned char r, unsigned char g, unsigned char b) {
@@ -51,7 +53,6 @@ Texture::Texture(unsigned char r, unsigned char g, unsigned char b) {
         data[i + 2] = b;
     }*/
 
-    glEnable(GL_TEXTURE_2D);
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -74,6 +75,10 @@ void Texture::bind() const {
 
 void Texture::unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+uint32_t Texture::id() const {
+    return textureId;
 }
 
 const std::filesystem::path& Texture::path() const {

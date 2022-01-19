@@ -38,7 +38,10 @@ public:
     [[nodiscard]] float far() const;
     [[nodiscard]] float speed() const;
 
+    void position(const glm::vec3& pos);
+    void rotation(const glm::quat& rot);
     void setPositionAndRotation(const glm::vec3& pos, const glm::quat& rot);
+
     Ray screenPointToRay(const glm::vec2& pos);
     glm::vec3 screenToWorldPoint(const glm::vec2& pos);
 };

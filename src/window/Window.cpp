@@ -1,5 +1,4 @@
 #include "Window.h"
-#include "../graphics/Image.h"
 
 GLFWwindow* Window::window;
 GLFWcursor* Window::cursor;
@@ -7,51 +6,6 @@ float Window::width;
 float Window::height;
 float Window::aspect;
 bool Window::wireframe;
-
-void APIENTRY glDebugOutput(GLenum source,
-                            GLenum type,
-                            unsigned int id,
-                            GLenum severity,
-                            GLsizei length,
-                            const char *message,
-                            const void *userParam)
-{
-    // ignore non-significant error/warning codes
-    if(id == 131169 || id == 131185 || id == 131218 || id == 131204) return;
-
-    BOOST_LOG_TRIVIAL(trace) << "---------------";
-    BOOST_LOG_TRIVIAL(trace) << "Debug message (" << id << "): " <<  message;
-
-    switch (source)
-    {
-        case GL_DEBUG_SOURCE_API:             BOOST_LOG_TRIVIAL(trace) << "Source: API"; break;
-        case GL_DEBUG_SOURCE_WINDOW_SYSTEM:   BOOST_LOG_TRIVIAL(trace) << "Source: Window System"; break;
-        case GL_DEBUG_SOURCE_SHADER_COMPILER: BOOST_LOG_TRIVIAL(trace) << "Source: Shader Compiler"; break;
-        case GL_DEBUG_SOURCE_THIRD_PARTY:     BOOST_LOG_TRIVIAL(trace) << "Source: Third Party"; break;
-        case GL_DEBUG_SOURCE_APPLICATION:     BOOST_LOG_TRIVIAL(trace) << "Source: Application"; break;
-        case GL_DEBUG_SOURCE_OTHER:           BOOST_LOG_TRIVIAL(trace) << "Source: Other"; break;
-    }
-
-    switch (type)
-    {
-        case GL_DEBUG_TYPE_ERROR:               BOOST_LOG_TRIVIAL(trace) << "Type: Error"; break;
-        case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR: BOOST_LOG_TRIVIAL(trace) << "Type: Deprecated Behaviour"; break;
-        case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR:  BOOST_LOG_TRIVIAL(trace) << "Type: Undefined Behaviour"; break;
-        case GL_DEBUG_TYPE_PORTABILITY:         BOOST_LOG_TRIVIAL(trace) << "Type: Portability"; break;
-        case GL_DEBUG_TYPE_PERFORMANCE:         BOOST_LOG_TRIVIAL(trace) << "Type: Performance"; break;
-        case GL_DEBUG_TYPE_MARKER:              BOOST_LOG_TRIVIAL(trace) << "Type: Marker"; break;
-        case GL_DEBUG_TYPE_PUSH_GROUP:          BOOST_LOG_TRIVIAL(trace) << "Type: Push Group"; break;
-        case GL_DEBUG_TYPE_POP_GROUP:           BOOST_LOG_TRIVIAL(trace) << "Type: Pop Group"; break;
-        case GL_DEBUG_TYPE_OTHER:               BOOST_LOG_TRIVIAL(trace) << "Type: Other"; break;
-    }
-    switch (severity)
-    {
-        case GL_DEBUG_SEVERITY_HIGH:         BOOST_LOG_TRIVIAL(trace) << "Severity: high"; break;
-        case GL_DEBUG_SEVERITY_MEDIUM:       BOOST_LOG_TRIVIAL(trace) << "Severity: medium"; break;
-        case GL_DEBUG_SEVERITY_LOW:          BOOST_LOG_TRIVIAL(trace) << "Severity: low"; break;
-        case GL_DEBUG_SEVERITY_NOTIFICATION: BOOST_LOG_TRIVIAL(trace) << "Severity: notification"; break;
-    }
-}
 
 void Window::init(int width, int height, const std::string& title, bool vSync) {
     glfwInit();
@@ -81,21 +35,30 @@ void Window::init(int width, int height, const std::string& title, bool vSync) {
 
     glClearColor(0.7f, 0.85f, 1.0f, 1.0f);
     glEnable(GL_DEPTH_TEST);
-    //glEnable(GL_CULL_FACE);
-    //glCullFace(GL_FRONT);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_FRONT);
 
-    int flags;
+    //glEnable(GL_ALPHA_TEST);
+    //glAlphaFunc(GL_GREATER, 0.1);
+
+    /*int flags;
     glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
     if (flags & GL_CONTEXT_FLAG_DEBUG_BIT){
         glEnable(GL_DEBUG_OUTPUT);
         glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
         glDebugMessageCallback(glDebugOutput, nullptr);
         glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-    }
+    }*/
 
     setWidthAndHeight(width, height);
+
+    // check OpenGL error
+    GLenum err;
+    while ((err = glGetError()) != GL_NO_ERROR) {
+        BOOST_LOG_TRIVIAL(error) << "OpenGL error: " << err;
+    }
 }
 
 void Window::terminate() {

@@ -19,7 +19,7 @@ public:
     ~TextRenderer();
 
     void render(const std::unique_ptr<Scene>& scene) override {};
-    void renderText(const std::string& text, float x, float y, float scale, const glm::vec3& color);
+    void renderText(const std::string& text, float x, float y, float scale, const glm::vec4& color);
 };
 
 #endif //VOX_TEXTRENDERER_H

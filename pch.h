@@ -23,6 +23,7 @@
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <optional>
 
 // OPENGL
 #include <GL/glew.h>

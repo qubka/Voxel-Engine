@@ -16,7 +16,7 @@ struct Font {
     ~Font();
 
 private:
-    const static int MAX_WIDTH = 4096;
+    const int NUM_GLYPHS = 128;
 };
 
 #endif //VOX_FONT_H

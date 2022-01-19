@@ -57,7 +57,7 @@ public:
     ~World();
 
     void drawGeo(const std::filesystem::path& path);
-    std::vector<entt::entity> intersectObjects(const Ray& ray);
+    std::optional<entt::entity> intersectObjects(const Ray& ray);
 };
 
 #endif //VOX_WORLD_H

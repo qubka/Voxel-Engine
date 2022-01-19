@@ -54,13 +54,17 @@ void windowSizeCallback(GLFWwindow* window, int width, int height) {
     Window::setWidthAndHeight(width, height);
 }
 
+void windowMaximizeCallback(GLFWwindow* window, int maximized) {
+
+}
+
 void Input::init() {
     GLFWwindow* window = Window::window;
     glfwSetKeyCallback(window, keyCallback);
     glfwSetMouseButtonCallback(window, mouseButtonCallback);
     glfwSetCursorPosCallback(window, cursorPositionCallback);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
-    //glfwSetWindowMaximizeCallback(window, windowMaximizeCallback);
+    glfwSetWindowMaximizeCallback(window, windowMaximizeCallback);
 }
 
 bool Input::getKey(int keycode) {

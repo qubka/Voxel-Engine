@@ -19,7 +19,7 @@ public:
     const std::unique_ptr<Scene>& defaultScene();
     std::shared_ptr<TextRenderer> defaultRenderer();
 
-    static Game& getInstance() {
+    static Game& instance() {
         static Game instance;
         return instance;
     }

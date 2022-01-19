@@ -98,22 +98,34 @@ float Camera::speed() const {
     return speed_;
 }
 
+void Camera::position(const glm::vec3& pos) {
+    position_ = pos;
+    updateViewMatrix();
+}
+
+void Camera::rotation(const glm::quat& rot) {
+    rotation_ = rot;
+    updateViewMatrix();
+}
+
 void Camera::setPositionAndRotation(const glm::vec3 &pos, const glm::quat &rot) {
     position_ = pos;
     rotation_ = rot;
     updateViewMatrix();
 }
 
-/// @link https://stackoverflow.com/questions/29997209/opengl-c-mouse-ray-picking-glmunproject
+/// @link https://antongerdelan.net/opengl/raycasting.html
 Ray Camera::screenPointToRay(const glm::vec2& pos) {
     float mouseX = 2.0f * pos.x / Window::width - 1.0f;
     float mouseY = 2.0f * pos.y / Window::height - 1.0f;
 
-    glm::vec4 screenPos(mouseX, -mouseY, 1.0f, 1.0f);
-    glm::mat4 inverseProjView = glm::inverse(projview_);
-    glm::vec4 worldPos = inverseProjView * screenPos;
+    glm::vec4 screenPos(mouseX, -mouseY, -1.0f, 1.0f);
+    glm::vec4 eyeRay = glm::inverse(projection_) * screenPos;
+    eyeRay.z = -1.0f;
+    eyeRay.w = 0.0f;
+    glm::vec4 worldRay = glm::inverse(view_) * eyeRay;
 
-    return { position_, glm::normalize(glm::vec3(worldPos)) };
+    return { position_, glm::normalize(glm::vec3(worldRay)) };
 }
 
 /// @link https://discourse.libcinder.org/t/screen-to-world-coordinates/1014/2

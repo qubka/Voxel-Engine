@@ -12,10 +12,10 @@ public:
     Texture(unsigned char r, unsigned char g, unsigned char b);
     ~Texture();
 
-
     void bind() const;
     void unbind() const;
 
+    uint32_t id() const;
     [[nodiscard]] const std::filesystem::path& path() const;
     [[nodiscard]] aiTextureType type() const;
 };

@@ -218,7 +218,7 @@ void World::createMesh(const Properties& properties, const std::vector<size_t>& 
     vertices.reserve(values.size());
     std::vector<GLuint> indices;
     indices.reserve(triangles.size());
-    std::vector<std::shared_ptr<Texture>> textures = { /*std::make_shared<Texture>(rand()%256, rand()%256, rand()%256)*/std::make_shared<Texture>(255, 255, 255) };
+    std::vector<std::shared_ptr<Texture>> textures = { std::make_shared<Texture>(rand()%256, rand()%256, rand()%256) };
 
     auto& registry = scene->registry;
     auto entity = registry.create();
@@ -232,15 +232,19 @@ void World::createMesh(const Properties& properties, const std::vector<size_t>& 
     }
 
     for (size_t i = 0; i < triangles.size(); i += 3) {
-        const glm::vec2& p0 = values[triangles[i + 0]];
-        const glm::vec2& p1 = values[triangles[i + 1]];
-        const glm::vec2& p2 = values[triangles[i + 2]];
+        const auto& t0 = triangles[i + 0];
+        const auto& t1 = triangles[i + 1];
+        const auto& t2 = triangles[i + 2];
+
+        const glm::vec2& p0 = values[t0];
+        const glm::vec2& p1 = values[t1];
+        const glm::vec2& p2 = values[t2];
 
         glm::vec2 min = glm::min(p0, glm::min(p1, p2));
         glm::vec2 max = glm::max(p0, glm::max(p1, p2));
 
         rtree.insert(boost::make_tuple(box(point(min.x, min.y), point(max.x, max.y)), entity, i));
-        //Debug::drawQuad(min, max, 0.1f);
+        //Debug::drawQuad(min, max, 0.1f, 10.0f);
     }
 
     registry.emplace<Mesh>(entity, vertices, indices, textures);
@@ -276,13 +280,17 @@ bool World::isInsidePolygon(const value& points, const glm::dvec2& pos) {
 }
 
 bool World::isInsideTriangle(const Mesh& mesh, GLuint i, const glm::vec2& p) {
-    auto a = glm::vec2(mesh.vertices[mesh.indices[i + 0]].position);
-    auto b = glm::vec2(mesh.vertices[mesh.indices[i + 1]].position);
-    auto c = glm::vec2(mesh.vertices[mesh.indices[i + 2]].position);
+    const auto& t0 = mesh.indices[i + 0];
+    const auto& t1 = mesh.indices[i + 1];
+    const auto& t2 = mesh.indices[i + 2];
 
-    glm::vec2 v0 (c - a);
-    glm::vec2 v1 (b - a);
-    glm::vec2 v2 (p - a);
+    auto a = glm::vec2(mesh.vertices[t0].position);
+    auto b = glm::vec2(mesh.vertices[t1].position);
+    auto c = glm::vec2(mesh.vertices[t2].position);
+
+    glm::vec2 v0 {c - a};
+    glm::vec2 v1 {b - a};
+    glm::vec2 v2 {p - a};
 
     float dot00 = glm::dot(v0, v0);
     float dot01 = glm::dot(v0, v1);
@@ -297,43 +305,68 @@ bool World::isInsideTriangle(const Mesh& mesh, GLuint i, const glm::vec2& p) {
     return (u >= 0.0f) && (v >= 0.0) && (u + v < 1.0f);
 }
 
-std::vector<entt::entity> World::intersectObjects(const Ray& ray) {
+std::optional<entt::entity> World::intersectObjects(const Ray& ray) {
     float rayDistance;
     if (plane.rayCast(ray, rayDistance)) {
         auto hit = ray.getPoint(rayDistance);
-        Debug::drawLine(ray.origin, hit, 10.0f);
-        BOOST_LOG_TRIVIAL(info) << glm::to_string(hit);
+       // Debug::drawLine(ray.origin, hit, 5.0f);
+       glm::vec3 min = hit;
+       glm::vec3 max = hit;
+        min.x -= 0.1;
+        min.y -= 0.1;
+        min.z = 0.1;
+        max.x += 0.1;
+        max.y += 0.1;
+        max.z = 0.1;
+
+        //Debug::drawQuad(hit, max);
 
         std::vector<data> res;
         rtree.query(geo::index::nearest(point(hit.x, hit.y), 5), std::back_inserter(res));
 
         for (const auto& [box, entity, index] : res) {
-            std::cout << "Found: " << scene->registry.get<Tag>(entity)() << std::endl;
-
             const auto& mesh = scene->registry.get<Mesh>(entity);
             if (isInsideTriangle(mesh, index, hit)) {
-                std::cout << "Found: " << scene->registry.get<Tag>(entity)()  << " = " << index << std::endl;
-                //break;
+                return std::optional<entt::entity>{entity};
             }
         }
     }
 
-    return {};//rtree.query();
+    return std::nullopt;
+}
+
+
+/*
+ * Properties extraction
+ */
+
+void removeAccented(std::string& str) {
+    char *p = str.data();
+    while ((*p) != 0) {
+        const static char*
+                //   "ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÚÛÜÝÞßàáâãäåæçèéêëìíîïðñòóôõö÷øùúûüýþÿ"
+                tr = "AAAAAAECEEEEIIIIDNOOOOOx0UUUUYPsaaaaaaeceeeeiiiiOnooooo/0uuuuypy";
+        unsigned char ch = (*p);
+        if (ch >= 192) {
+            (*p) = tr[ch-192];
+        }
+        ++p; // http://stackoverflow.com/questions/14094621/
+    }
 }
 
 World::Properties::Properties(const value& properties) {
     if (properties.HasMember("GID_2")) {
-        id = properties["GID_2"].GetString();
+        id = properties["GID_2"].GetString(); removeAccented(id);
     } else if (properties.HasMember("GID_1")) {
-        id = properties["GID_1"].GetString();
+        id = properties["GID_1"].GetString(); removeAccented(id);
     } else if (properties.HasMember("GID_0")) {
-        id = properties["GID_0"].GetString();
+        id = properties["GID_0"].GetString(); removeAccented(id);
     }
     if (properties.HasMember("NAME_2")) {
-        name = properties["NAME_2"].GetString();
+        name = properties["NAME_2"].GetString(); removeAccented(name);
     } else if (properties.HasMember("NAME_1")) {
-        name = properties["NAME_1"].GetString();
+        name = properties["NAME_1"].GetString(); removeAccented(name);
     } else if (properties.HasMember("NAME_0")) {
-        name = properties["NAME_0"].GetString();
+        name = properties["NAME_0"].GetString(); removeAccented(name);
     }
 }

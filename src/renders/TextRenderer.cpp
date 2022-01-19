@@ -24,8 +24,8 @@ TextRenderer::TextRenderer() : shader(), text() {
     shader.createAllUniform("projection", "color", "texture");
 
     /* Create texture atlasses for several font sizes */
-    //a48 = std::make_unique<Font>(face, 48);
-    //a24 = std::make_unique<Font>(face, 24);
+    a48 = std::make_unique<Font>(face, 48);
+    a24 = std::make_unique<Font>(face, 24);
     a12 = std::make_unique<Font>(face, 12);
 
     FT_Done_Face(face);
@@ -36,13 +36,13 @@ TextRenderer::~TextRenderer() {
 
 }
 
-void TextRenderer::renderText(const std::string& t, float x, float y, float scale, const glm::vec3& color) {
-    /*shader.start();
+void TextRenderer::renderText(const std::string& t, float x, float y, float scale, const glm::vec4& color) {
+    shader.start();
     shader.setUniform("color", color);
     shader.setUniform("texture", 0);
     shader.setUniform("projection", glm::ortho(0.0f, Window::width, 0.0f, Window::height));
 
-    text.draw(a12, t, x, y, scale);
+    text.draw(a24, t, x, y, scale);
 
-    shader.stop();*/
+    shader.stop();
 }

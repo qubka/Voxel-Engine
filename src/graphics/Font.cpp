@@ -4,100 +4,69 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
-Font::Font(const FT_Face& face, int size) : width(0), height(0) {
+Font::Font(const FT_Face& face, int size) {
     FT_Set_Pixel_Sizes(face, 0, size);
     const auto& glyph = face->glyph;
+    //FT_Set_Char_Size(face, 0, size << 6, 48, 48);
 
-    FT_UInt index;
-    FT_ULong character = FT_Get_First_Char(face, &index);
-    while (index != 0) {
-        if (FT_Load_Char(face, character, FT_LOAD_RENDER)) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to load glyph '" << character << "' at " << index;
+    int cell = 1 + (face->size->metrics.height >> 6);
+    int ox = 0, oy = 0;
+    int maxDim = cell * std::ceil(std::sqrt(NUM_GLYPHS / 2));
+
+    width = 1;
+    while (width < maxDim) width <<= 1;
+    height = width;
+
+    std::vector<unsigned char> pixels(width * height);
+
+    for (unsigned char c = 32; c < NUM_GLYPHS; c++) {
+        if (FT_Load_Char(face, c, FT_LOAD_RENDER | FT_LOAD_FORCE_AUTOHINT | FT_LOAD_TARGET_LIGHT)) {
+            BOOST_LOG_TRIVIAL(error) << "Failed to load glyph '" << c << "'";
             continue;
         }
 
-        width= glyph->bitmap.width;
-        height= glyph->bitmap.rows;
+        FT_Bitmap* bmp = &glyph->bitmap;
 
-        /* Upload the "bitmap", which contains an 8-bit grayscale image, as an alpha texture */
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width,height , 0, GL_ALPHA, GL_UNSIGNED_BYTE, glyph->bitmap.buffer);
-
-        //GLubyte pixels[width * height * sizeof(GLubyte)];
-        //glGetTexImage(GL_TEXTURE_2D, 0, GL_ALPHA, GL_UNSIGNED_BYTE, &pixels);
-        stbi_write_png(std::string("res/atlas_" + std::to_string(index) + ".png").c_str(), width, height, 1, glyph->bitmap.buffer, width * 1);
-
-        BOOST_LOG_TRIVIAL(info) << "Generated a " << width << "x " << height << " (" << width * height / 1024 << " kb) texture atlas.";
-
-        character = FT_Get_Next_Char(face, character, &index);
-    }
-
-    /*glm::ivec2 r, o;
-    FT_UInt index;
-    FT_ULong character = FT_Get_First_Char(face, &index);
-    while (index != 0) {
-        if (FT_Load_Char(face, character, FT_LOAD_RENDER)) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to load glyph '" << character << "' at " << index;
-            continue;
+        if (ox + bmp->width >= width) {
+            ox = 0;
+            oy += cell;
         }
 
-        if (r.x + glyph->bitmap.width + 1 >= MAX_WIDTH) {
-            width = std::max(width, r.x);
-            height += r.y;
-            r.x = 0;
-            r.y = 0;
+        for (int row = 0; row < bmp->rows; ++row) {
+            for (int col = 0; col < bmp->width; ++col) {
+                int x = ox + col;
+                int y = oy + row;
+                pixels[y * width + x] = bmp->buffer[row * bmp->pitch + col];
+            }
         }
 
-        r.x += glyph->bitmap.width + 1;
-        r.y = std::max(r.y, static_cast<int>(glyph->bitmap.rows));
-
-        character = FT_Get_Next_Char(face, character, &index);
-    }
-
-    width = std::max(width, r.x);
-    height += r.y;
-
-    glActiveTexture(GL_TEXTURE0);
-    glGenTextures(1, &textureId);
-    glBindTexture(GL_TEXTURE_2D, textureId);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, width, height, 0, GL_ALPHA, GL_UNSIGNED_BYTE, 0);
-
-    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    r.y = 0;
-
-    character = FT_Get_First_Char(face, &index);
-    while (index != 0) {
-        if (FT_Load_Char(face, character, FT_LOAD_RENDER)) {
-            BOOST_LOG_TRIVIAL(error) << "Failed to load glyph '" << character << "' at " << index;
-            continue;
-        }
-
-        if (o.x + glyph->bitmap.width + 1 >= MAX_WIDTH) {
-            o.y += r.y;
-            r.y = 0;
-            o.x = 0;
-        }
-
-        glTexSubImage2D(GL_TEXTURE_2D, 0, o.x, o.y, glyph->bitmap.width, glyph->bitmap.rows, GL_ALPHA, GL_UNSIGNED_BYTE, glyph->bitmap.buffer);
-
-        glyphs.emplace(character, Glyph {
+        glyphs.emplace(c, Glyph {
             {glyph->advance.x >> 6, glyph->advance.y >> 6},
             {glyph->bitmap.width, glyph->bitmap.rows},
             {glyph->bitmap_left, glyph->bitmap_top},
-            {o.x / static_cast<float>(width), o.y / static_cast<float>(height)}
+            {ox / static_cast<float>(width), oy / static_cast<float>(height)}
         });
 
-        r.y = std::max(r.y, static_cast<int>(glyph->bitmap.rows));
-        o.x += glyph->bitmap.width + 1;
+        ox += bmp->width + 1;
+    }
 
-        character = FT_Get_Next_Char(face, character, &index);
-    }*/
+    glGenTextures(1, &textureId);
+    glBindTexture(GL_TEXTURE_2D, textureId);
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // disable byte-alignment restriction
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_R8, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, pixels.data());
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    std::filesystem::path path = "res/atlas";
+    path += std::to_string(size);
+    path += ".png";
+    stbi_write_png(path.c_str(), width, height, 1, pixels.data(), width * 1);
+
+    BOOST_LOG_TRIVIAL(info) << "Generated a " << width << "x " << height << " (" << width * height / 1024 << " kb) texture atlas.";
 }
 
 Font::~Font() {

@@ -21,8 +21,8 @@ void Game::init() {
 
     // Create renders
     renders.push_back(std::make_shared<TextRenderer>());
-    //renders.push_back(std::make_shared<MeshRenderer>());
-    //renders.push_back(std::make_shared<PrimitiveRenderer>());
+    renders.push_back(std::make_shared<MeshRenderer>());
+    renders.push_back(std::make_shared<PrimitiveRenderer>());
 
     // Create systems
     systems.push_back(std::make_shared<TransformSystem>());
@@ -116,7 +116,7 @@ std::shared_ptr<TextRenderer> Game::defaultRenderer() {
 }
 
 int main() {
-    Game& game = Game::getInstance();
+    Game& game = Game::instance();
     game.init();
     game.run();
     return 0;
