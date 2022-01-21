@@ -7,7 +7,7 @@ private:
     GLuint fragmentId;
     std::map<std::string, GLint> uniforms;
 
-    [[nodiscard]] GLuint createShader(const std::string& shaderCode, GLuint shaderType) const;
+    GLuint createShader(const std::string& shaderCode, GLuint shaderType) const;
     std::string readFile(const std::filesystem::path& path);
 public:
     GLuint programId;

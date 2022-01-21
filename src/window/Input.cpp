@@ -43,7 +43,7 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
     if (action == GLFW_PRESS) {
         Input::keys[key] = true;
         Input::frames[key] = Input::current;
-    } else if (action == GLFW_RELEASE){
+    } else if (action == GLFW_RELEASE) {
         Input::keys[key] = false;
         Input::frames[key] = Input::current;
     }

@@ -3,9 +3,9 @@
 
 struct Image {
     unsigned char* pixels;
-    int width;
-    int height;
-    int channels;
+    int width{0};
+    int height{0};
+    int channels{0};
 
     explicit Image(const std::filesystem::path& path);
     ~Image();

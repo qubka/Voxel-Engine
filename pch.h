@@ -27,6 +27,7 @@
 
 // OPENGL
 #include <GL/glew.h>
+#include <GL/glext.h>
 #include <GLFW/glfw3.h>
 
 // BOOST
@@ -44,5 +45,5 @@
 #include <entt/entt.hpp>
 
 // Other
-#include "src/utils/Utils.h"
+#include "src/utils/Extentions.h"
 #include "src/utils/Debug.h"

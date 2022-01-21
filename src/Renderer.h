@@ -2,9 +2,10 @@
 #define VOX_RENDERER_H
 
 class Scene;
+class Game;
 
 class Renderer {
-public:
+    friend Game;
     virtual void render(const std::unique_ptr<Scene>& scene) = 0;
 };
 

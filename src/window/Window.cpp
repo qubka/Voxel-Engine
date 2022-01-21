@@ -1,16 +1,18 @@
 #include "Window.h"
+#include "../graphics/Image.h"
 
 GLFWwindow* Window::window;
 GLFWcursor* Window::cursor;
 float Window::width;
 float Window::height;
 float Window::aspect;
+bool Window::minimized;
 bool Window::wireframe;
 
 void Window::init(int width, int height, const std::string& title, bool vSync) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -40,21 +42,8 @@ void Window::init(int width, int height, const std::string& title, bool vSync) {
     glEnable(GL_CULL_FACE);
     glCullFace(GL_FRONT);
 
-    //glEnable(GL_ALPHA_TEST);
-    //glAlphaFunc(GL_GREATER, 0.1);
-
-    /*int flags;
-    glGetIntegerv(GL_CONTEXT_FLAGS, &flags);
-    if (flags & GL_CONTEXT_FLAG_DEBUG_BIT){
-        glEnable(GL_DEBUG_OUTPUT);
-        glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glDebugMessageCallback(glDebugOutput, nullptr);
-        glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, nullptr, GL_TRUE);
-    }*/
-
     setWidthAndHeight(width, height);
 
-    // check OpenGL error
     GLenum err;
     while ((err = glGetError()) != GL_NO_ERROR) {
         BOOST_LOG_TRIVIAL(error) << "OpenGL error: " << err;
@@ -83,18 +72,18 @@ void Window::setShouldClose(bool flag) {
     glfwSetWindowShouldClose(window, flag);
 }
 
-/*void Window::setCursor(const std::filesystem::path& path) {
+void Window::setCursor(const std::filesystem::path& path) {
     Image image{path};
     GLFWimage img{image.width, image.height, image.pixels};
     cursor = glfwCreateCursor(&img, 0, 0);
     glfwSetCursor(window, cursor);
-}*/
+}
 
 void Window::setCursorMode(int mode) {
     glfwSetInputMode(window, GLFW_CURSOR, mode);
 }
 
-void Window::toogleWireframe() {
+void Window::toggleWireframe() {
     wireframe =! wireframe;
     glPolygonMode(GL_FRONT_AND_BACK, wireframe ? GL_LINE : GL_FILL);
 }
@@ -103,4 +92,5 @@ void Window::setWidthAndHeight(int w, int h) {
     width = static_cast<float>(w);
     height = static_cast<float>(h);
     aspect = width / height;
+    minimized = (h == 0 || w == 0);
 }

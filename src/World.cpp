@@ -7,6 +7,7 @@
 #include "graphics/Texture.h"
 #include "graphics/Mesh.h"
 #include "graphics/Vertex.h"
+#include "geometry/Ray.h"
 
 #include "components/Transform.h"
 #include "components/Tag.h"
@@ -223,9 +224,15 @@ void World::createMesh(const Properties& properties, const std::vector<size_t>& 
     auto& registry = scene->registry;
     auto entity = registry.create();
 
+    glm::vec3 bmin{std::numeric_limits<float>::max()};
+    glm::vec3 bmax{std::numeric_limits<float>::lowest()};
+
     for (const auto& v : values) {
         //float z = glm::perlin(v);
-        vertices.emplace_back(glm::vec3(v, 0), glm::vec3(0), glm::vec3(0));
+        auto pos = glm::vec3(v, 0);
+        bmin = glm::min(bmin, pos);
+        bmax = glm::max(bmax, pos);
+        vertices.emplace_back(pos, glm::vec3(0), glm::vec3(0));
     }
     for (const auto& t : triangles) {
         indices.push_back(t);
@@ -250,6 +257,7 @@ void World::createMesh(const Properties& properties, const std::vector<size_t>& 
     registry.emplace<Mesh>(entity, vertices, indices, textures);
     registry.emplace<Transform>(entity);
     registry.emplace<Tag>(entity, properties.name);
+    //registry.emplace<AABB>(entity, bmin, bmax);
 
     values.clear();
 }
@@ -310,16 +318,6 @@ std::optional<entt::entity> World::intersectObjects(const Ray& ray) {
     if (plane.rayCast(ray, rayDistance)) {
         auto hit = ray.getPoint(rayDistance);
        // Debug::drawLine(ray.origin, hit, 5.0f);
-       glm::vec3 min = hit;
-       glm::vec3 max = hit;
-        min.x -= 0.1;
-        min.y -= 0.1;
-        min.z = 0.1;
-        max.x += 0.1;
-        max.y += 0.1;
-        max.z = 0.1;
-
-        //Debug::drawQuad(hit, max);
 
         std::vector<data> res;
         rtree.query(geo::index::nearest(point(hit.x, hit.y), 5), std::back_inserter(res));

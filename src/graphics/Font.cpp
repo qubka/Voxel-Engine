@@ -9,9 +9,9 @@ Font::Font(const FT_Face& face, int size) {
     const auto& glyph = face->glyph;
     //FT_Set_Char_Size(face, 0, size << 6, 48, 48);
 
-    int cell = 1 + (face->size->metrics.height >> 6);
+    metrics = 1 + (face->size->metrics.height >> 6);
     int ox = 0, oy = 0;
-    int maxDim = cell * std::ceil(std::sqrt(NUM_GLYPHS / 2));
+    int maxDim = metrics * std::ceil(std::sqrt(NUM_GLYPHS / 2));
 
     width = 1;
     while (width < maxDim) width <<= 1;
@@ -29,7 +29,7 @@ Font::Font(const FT_Face& face, int size) {
 
         if (ox + bmp->width >= width) {
             ox = 0;
-            oy += cell;
+            oy += metrics;
         }
 
         for (int row = 0; row < bmp->rows; ++row) {
@@ -61,14 +61,22 @@ Font::Font(const FT_Face& face, int size) {
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    std::filesystem::path path = "res/atlas";
+    /*std::filesystem::path path {"res/atlas"};
     path += std::to_string(size);
     path += ".png";
-    stbi_write_png(path.c_str(), width, height, 1, pixels.data(), width * 1);
+    stbi_write_png(path.c_str(), width, height, 1, pixels.data(), width * 1);*/
 
     BOOST_LOG_TRIVIAL(info) << "Generated a " << width << "x " << height << " (" << width * height / 1024 << " kb) texture atlas.";
 }
 
 Font::~Font() {
     glDeleteTextures(1, &textureId);
+}
+
+void Font::bind() const {
+    glBindTexture(GL_TEXTURE_2D, textureId);
+}
+
+void Font::unbind() const {
+    glBindTexture(GL_TEXTURE_2D, 0);
 }

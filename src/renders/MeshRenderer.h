@@ -11,6 +11,7 @@ private:
 public:
     MeshRenderer();
     ~MeshRenderer();
+
     void render(const std::unique_ptr<Scene>& scene) override;
 };
 

@@ -1,8 +1,8 @@
-#include "Text.h"
+#include "TextMesh.h"
 #include "Glyph.h"
 #include "Font.h"
 
-Text::Text() {
+TextMesh::TextMesh() {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 
@@ -18,17 +18,23 @@ Text::Text() {
     glBindVertexArray(0);
 }
 
-Text::~Text() {
+TextMesh::~TextMesh() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
 }
 
-void Text::draw(const std::unique_ptr<Font>& font, const std::string& text, float x, float y, float scale) const {
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, font->textureId);
+void TextMesh::draw(const std::unique_ptr<Font>& font, const std::string& text, float x, float y, float scale) const {
     glBindVertexArray(vao);
 
+    float initial = x;
+
     for (const auto& c : text) {
+        if (c == '\n') {
+            x = initial;
+            y -= font->metrics;
+            continue;
+        }
+
         const auto it = font->glyphs.find(c);
         const auto& glyph = it != font->glyphs.end() ? it->second : font->glyphs.at(127);
 
@@ -41,45 +47,6 @@ void Text::draw(const std::unique_ptr<Font>& font, const std::string& text, floa
 
         float w = glyph.size.x * scale;
         float h = glyph.size.y * scale;
-
-        /*float vertices[6][4] = {
-            {
-                px,
-                py + h,
-                tx,
-                ty
-            },
-            {
-                px,
-                py,
-                tx,
-                ty + oy
-            },
-            {
-                px + w,
-                py,
-                tx + ox,
-                ty + oy
-            },
-            {
-                px,
-                py + h,
-                tx,
-                ty
-            },
-            {
-                px + w,
-                py,
-                tx + ox,
-                ty + oy
-            },
-            {
-                px + w,
-                py + h,
-                tx + ox,
-                ty
-            }
-        };*/
 
         float vertices[6][4] = {
             {
@@ -129,6 +96,5 @@ void Text::draw(const std::unique_ptr<Font>& font, const std::string& text, floa
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 

@@ -1,6 +1,6 @@
 #include "PrimitiveRenderer.h"
 #include "../Scene.h"
-#include "../graphics/Primitive.h"
+#include "../graphics/PrimitiveMesh.h"
 #include "../graphics/Camera.h"
 
 PrimitiveRenderer::PrimitiveRenderer() : shader() {
@@ -18,10 +18,10 @@ void PrimitiveRenderer::render(const std::unique_ptr<Scene>& scene) {
     shader.setUniform("projview", scene->camera->projview());
     shader.setUniform("color", glm::vec4(1));
 
-    auto entities = scene->registry.view<const Primitive>();
+    auto entities = scene->registry.view<const PrimitiveMesh>();
 
-    for (auto [entity, object] : entities.each()) {
-        object.draw();
+    for (auto [entity, mesh] : entities.each()) {
+        mesh.draw();
     }
 
     shader.stop();

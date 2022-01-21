@@ -1,8 +1,7 @@
 #ifndef VOX_EVENTS_H
 #define VOX_EVENTS_H
 
-class Input {
-public:
+struct Input {
     static bool keys[1032];
     static uint32_t frames[1032];
     static uint32_t current;

@@ -8,31 +8,30 @@ class TextRenderer;
 
 class Game {
 public:
-    Game() = default;
+    Game();
     ~Game();
+
     void init();
     void run();
 
-    static const inline int TARGET_FPS = 120;
-    static constexpr double MS_PER_UPDATE = (1.0 / TARGET_FPS);
-
     const std::unique_ptr<Scene>& defaultScene();
-    std::shared_ptr<TextRenderer> defaultRenderer();
 
     static Game& instance() {
         static Game instance;
         return instance;
     }
+
+    static float elapsedTime;
+    static int framesPerSecond;
+
 private:
     std::unique_ptr<Scene> scene;
 
     std::vector<std::shared_ptr<Renderer>> renders;
     std::vector<std::shared_ptr<System>> systems;
 
-    void input();
     void render();
-    void update(double elapsedTime);
-    void sync(double currentTime);
+    void update();
 };
 
 #endif //VOX_GAME_H

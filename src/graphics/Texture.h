@@ -16,8 +16,8 @@ public:
     void unbind() const;
 
     uint32_t id() const;
-    [[nodiscard]] const std::filesystem::path& path() const;
-    [[nodiscard]] aiTextureType type() const;
+    const std::filesystem::path& path() const;
+    aiTextureType type() const;
 };
 
 #endif //VOX_TEXTURE_H

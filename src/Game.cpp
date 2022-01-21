@@ -15,14 +15,20 @@
 #include "systems/DebugSystem.h"
 #include "systems/DestroySystem.h"
 
+float Game::elapsedTime;
+int Game::framesPerSecond;
+
+Game::Game() {
+}
+
 void Game::init() {
-    Window::init(1280, 720, "Vox", false);
+    Window::init(1280, 720, "Vox", true);
     Input::init();
 
     // Create renders
-    renders.push_back(std::make_shared<TextRenderer>());
     renders.push_back(std::make_shared<MeshRenderer>());
     renders.push_back(std::make_shared<PrimitiveRenderer>());
+    renders.push_back(std::make_shared<TextRenderer>());
 
     // Create systems
     systems.push_back(std::make_shared<TransformSystem>());
@@ -38,28 +44,29 @@ Game::~Game() {
 }
 
 void Game::run() {
-    double previous = glfwGetTime();
-    double steps = 0.0;
+    double previousTime = glfwGetTime();
+    //double elapsedTime = 0.0;
+    double frameTime = 0.0;
+    int frameCount = 0;
 
     while (!Window::isShouldClose()) {
-        double current = glfwGetTime();
-        double elapsed = current - previous;
-        previous = current;
-        steps += elapsed;
+        double currentTime = glfwGetTime();
+        elapsedTime = static_cast<float>(currentTime - previousTime);
+        previousTime = currentTime;
 
-        input();
-
-        while (steps >= MS_PER_UPDATE) {
-            update(elapsed);
-            steps -= MS_PER_UPDATE;
+        frameCount++;
+        if (currentTime - frameTime >= 1.0) {
+            framesPerSecond = frameCount;
+            frameCount = 0;
+            frameTime = currentTime;
         }
 
+        update();
         render();
-        sync(current);
     }
 }
 
-void Game::input() {
+void Game::update() {
     if (Input::getKeyDown(GLFW_KEY_ESCAPE)) {
         Window::setShouldClose(true);
     }
@@ -69,18 +76,10 @@ void Game::input() {
     }
 
     if (Input::getKeyDown(GLFW_KEY_GRAVE_ACCENT)) {
-        Window::toogleWireframe();
+        Window::toggleWireframe();
     }
 
-    scene->input();
-
-    for (const auto& system : systems) {
-        system->input();
-    }
-}
-
-void Game::update(double elapsed) {
-    scene->update(elapsed);
+    scene->update();
 
     for (const auto& system : systems) {
         system->update(scene);
@@ -90,29 +89,18 @@ void Game::update(double elapsed) {
 void Game::render() {
     Window::clear();
 
-    scene->render();
-
-    for (const auto& renderer : renders) {
-        renderer->render(scene);
+    if (!Window::minimized) {
+        for (const auto& renderer : renders) {
+            renderer->render(scene);
+        }
     }
 
     Input::update();
     Window::update();
 }
 
-void Game::sync(double currentTime) {
-    double endTime = currentTime + MS_PER_UPDATE;
-    while (glfwGetTime() < endTime) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-    }
-}
-
 const std::unique_ptr<Scene>& Game::defaultScene() {
     return scene;
-}
-
-std::shared_ptr<TextRenderer> Game::defaultRenderer() {
-    return std::dynamic_pointer_cast<TextRenderer>(renders[0]);
 }
 
 int main() {

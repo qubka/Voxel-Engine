@@ -2,11 +2,11 @@
 #define VOX_SYSTEM_H
 
 class Scene;
+class Game;
 
 class System
 {
-public:
-    virtual void input() = 0;
+    friend Game;
     virtual void update(const std::unique_ptr<Scene>& scene) = 0;
 };
 

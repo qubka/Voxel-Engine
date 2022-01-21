@@ -1,6 +1,8 @@
 #ifndef VOX_SCENE_H
 #define VOX_SCENE_H
 
+#include "utils/ProcessInfo.h"
+
 class Camera;
 class Entity;
 class World;
@@ -11,12 +13,14 @@ public:
     std::shared_ptr<Camera> camera;
     std::unique_ptr<World> world;
 
+    ProcessInfo info;
+
+    entt::entity infoText;
+
     Scene();
     ~Scene();
 
     void init();
-    void input();
-    void update(const double& elapsed);
-    void render();
+    void update();
 };
 #endif //VOX_SCENE_H

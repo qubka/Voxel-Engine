@@ -3,13 +3,13 @@
 
 class GLFWwindow;
 
-class Window {
-public:
+struct Window {
     static GLFWwindow* window;
     static GLFWcursor* cursor;
     static float width;
     static float height;
     static float aspect;
+    static bool minimized;
     static bool wireframe;
 
     static void init(int width, int height, const std::string& title, bool vSync);
@@ -19,11 +19,12 @@ public:
 
     static bool isShouldClose();
     static void setShouldClose(bool flag);
-    static void setWidthAndHeight(int width, int height);
-    //static void setCursor(const std::filesystem::path& path);
+
+    static void setCursor(const std::filesystem::path& path);
     static void setCursorMode(int mode);
 
-    static void toogleWireframe();
+    static void toggleWireframe();
+    static void setWidthAndHeight(int width, int height);
 };
 
 #endif //VOX_WINDOW_H

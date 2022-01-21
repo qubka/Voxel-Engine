@@ -4,7 +4,6 @@
 #include "../System.h"
 
 class DestroySystem : public System {
-    void input() override {}
     void update(const std::unique_ptr<Scene>& scene) override;
 };
 

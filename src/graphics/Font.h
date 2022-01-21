@@ -6,17 +6,21 @@
 
 class Glyph;
 
-struct Font {
+class Font {
+private:
     GLuint textureId;
+    const int NUM_GLYPHS = 128;
+public:
     int width;
     int height;
+    int metrics;
     std::map<unsigned char, Glyph> glyphs;
 
     Font(const FT_Face& face, int size);
     ~Font();
 
-private:
-    const int NUM_GLYPHS = 128;
+    void bind() const;
+    void unbind() const;
 };
 
 #endif //VOX_FONT_H

@@ -1,5 +1,5 @@
-#ifndef VOX_UTILS_H
-#define VOX_UTILS_H
+#ifndef VOX_EXTENTIONS_H
+#define VOX_EXTENTIONS_H
 
 #include <assimp/types.h>
 #include "glm/detail/setup.hpp"
@@ -13,10 +13,10 @@ namespace glm {
     GLM_INLINE glm::mat4 mat4_cast(const aiMatrix3x3& m) { return glm::transpose(glm::make_mat3(&m.a1)); }
     GLM_CONSTEXPR uint32_t hash(const char* s, int off = 0) { return !s[off] ? 5381 : (hash(s, off+1)*33) ^ s[off]; }
 
-    template<typename T, qualifier Q>
+    /*template<typename T, qualifier Q>
     GLM_FUNC_QUALIFIER GLM_CONSTEXPR T cross(const vec<2, T, Q>& x, const vec<2, T, Q>& y)  {
         return x.x * y.y - x.y * y.x;
-    }
+    }*/
 }
 
 namespace vec3 {
@@ -37,4 +37,10 @@ namespace vec2 {
     GLM_INLINE glm::vec2 zero = glm::vec2(0,0);
 }
 
-#endif //VOX_UTILS_H
+#define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX 0x9048
+#define GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX 0x9049
+
+GLint glxGpuTotalMemory();
+GLint glxGpuAvailMemory();
+
+#endif //VOX_EXTENTIONS_H

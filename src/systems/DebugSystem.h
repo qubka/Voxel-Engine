@@ -3,8 +3,7 @@
 
 #include "../System.h"
 
-struct DebugSystem : public System {
-    void input() override {}
+class DebugSystem : public System {
     void update(const std::unique_ptr<Scene>& scene) override;
 };
 

@@ -37,7 +37,7 @@ namespace glm
 	///
 	/// @tparam T A floating-point scalar type
 	///
-	/// @see - glm::ortho(T const& left, T const& right, T const& bottom, T const& top, T const& zNear, T const& zFar)
+	/// @see - glm::ortho(T const& left, T const& right, T const& bottom, T const& top, T const& zNear_, T const& far_)
 	/// @see <a href="https://www.khronos.org/registry/OpenGL-Refpages/gl2.1/xhtml/gluOrtho2D.xml">gluOrtho2D man page</a>
 	template<typename T>
 	GLM_FUNC_DECL mat<4, 4, T, defaultp> ortho(

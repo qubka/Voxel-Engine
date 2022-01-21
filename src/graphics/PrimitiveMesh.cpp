@@ -1,6 +1,6 @@
-#include "Primitive.h"
+#include "PrimitiveMesh.h"
 
-Primitive::Primitive(std::vector<glm::vec3> v, GLuint mode) : vertices(std::move(v)), mode(mode) {
+PrimitiveMesh::PrimitiveMesh(std::vector<glm::vec3> v, GLuint mode) : vertices(std::move(v)), mode(mode) {
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 
@@ -16,12 +16,12 @@ Primitive::Primitive(std::vector<glm::vec3> v, GLuint mode) : vertices(std::move
     glBindVertexArray(0);
 }
 
-Primitive::~Primitive() {
+PrimitiveMesh::~PrimitiveMesh() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
 }
 
-void Primitive::draw() const {
+void PrimitiveMesh::draw() const {
     glBindVertexArray(vao);
     glDrawArrays(mode, 0, vertices.size());
     glBindVertexArray(0);

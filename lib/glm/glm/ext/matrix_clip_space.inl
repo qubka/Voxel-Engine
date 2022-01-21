@@ -68,7 +68,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoZO(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return orthoLH_ZO(left, right, bottom, top, zNear, zFar);
+			return orthoLH_ZO(left, right, bottom, top, zNear_, far_);
 #		else
 			return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -78,7 +78,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoNO(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return orthoLH_NO(left, right, bottom, top, zNear, zFar);
+			return orthoLH_NO(left, right, bottom, top, zNear_, far_);
 #		else
 			return orthoRH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -88,7 +88,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoLH(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return orthoLH_ZO(left, right, bottom, top, zNear, zFar);
+			return orthoLH_ZO(left, right, bottom, top, zNear_, far_);
 #		else
 			return orthoLH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -99,7 +99,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> orthoRH(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
+			return orthoRH_ZO(left, right, bottom, top, zNear_, far_);
 #		else
 			return orthoRH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -109,11 +109,11 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> ortho(T left, T right, T bottom, T top, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_ZO
-			return orthoLH_ZO(left, right, bottom, top, zNear, zFar);
+			return orthoLH_ZO(left, right, bottom, top, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_NO
-			return orthoLH_NO(left, right, bottom, top, zNear, zFar);
+			return orthoLH_NO(left, right, bottom, top, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_ZO
-			return orthoRH_ZO(left, right, bottom, top, zNear, zFar);
+			return orthoRH_ZO(left, right, bottom, top, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_NO
 			return orthoRH_NO(left, right, bottom, top, zNear, zFar);
 #		endif
@@ -297,7 +297,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveZO(T fovy, T aspect, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return perspectiveLH_ZO(fovy, aspect, zNear, zFar);
+			return perspectiveLH_ZO(fovy, aspect, zNear_, far_);
 #		else
 			return perspectiveRH_ZO(fovy, aspect, zNear, zFar);
 #		endif
@@ -307,7 +307,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveNO(T fovy, T aspect, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return perspectiveLH_NO(fovy, aspect, zNear, zFar);
+			return perspectiveLH_NO(fovy, aspect, zNear_, far_);
 #		else
 			return perspectiveRH_NO(fovy, aspect, zNear, zFar);
 #		endif
@@ -317,7 +317,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveLH(T fovy, T aspect, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return perspectiveLH_ZO(fovy, aspect, zNear, zFar);
+			return perspectiveLH_ZO(fovy, aspect, zNear_, far_);
 #		else
 			return perspectiveLH_NO(fovy, aspect, zNear, zFar);
 #		endif
@@ -328,7 +328,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveRH(T fovy, T aspect, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return perspectiveRH_ZO(fovy, aspect, zNear, zFar);
+			return perspectiveRH_ZO(fovy, aspect, zNear_, far_);
 #		else
 			return perspectiveRH_NO(fovy, aspect, zNear, zFar);
 #		endif
@@ -338,11 +338,11 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspective(T fovy, T aspect, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_ZO
-			return perspectiveLH_ZO(fovy, aspect, zNear, zFar);
+			return perspectiveLH_ZO(fovy, aspect, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_NO
-			return perspectiveLH_NO(fovy, aspect, zNear, zFar);
+			return perspectiveLH_NO(fovy, aspect, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_ZO
-			return perspectiveRH_ZO(fovy, aspect, zNear, zFar);
+			return perspectiveRH_ZO(fovy, aspect, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_NO
 			return perspectiveRH_NO(fovy, aspect, zNear, zFar);
 #		endif
@@ -432,7 +432,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFovZO(T fov, T width, T height, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return perspectiveFovLH_ZO(fov, width, height, zNear, zFar);
+			return perspectiveFovLH_ZO(fov, width, height, zNear_, far_);
 #		else
 			return perspectiveFovRH_ZO(fov, width, height, zNear, zFar);
 #		endif
@@ -442,7 +442,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFovNO(T fov, T width, T height, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return perspectiveFovLH_NO(fov, width, height, zNear, zFar);
+			return perspectiveFovLH_NO(fov, width, height, zNear_, far_);
 #		else
 			return perspectiveFovRH_NO(fov, width, height, zNear, zFar);
 #		endif
@@ -452,7 +452,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFovLH(T fov, T width, T height, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return perspectiveFovLH_ZO(fov, width, height, zNear, zFar);
+			return perspectiveFovLH_ZO(fov, width, height, zNear_, far_);
 #		else
 			return perspectiveFovLH_NO(fov, width, height, zNear, zFar);
 #		endif
@@ -462,7 +462,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFovRH(T fov, T width, T height, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_ZO_BIT
-			return perspectiveFovRH_ZO(fov, width, height, zNear, zFar);
+			return perspectiveFovRH_ZO(fov, width, height, zNear_, far_);
 #		else
 			return perspectiveFovRH_NO(fov, width, height, zNear, zFar);
 #		endif
@@ -472,11 +472,11 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> perspectiveFov(T fov, T width, T height, T zNear, T zFar)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_ZO
-			return perspectiveFovLH_ZO(fov, width, height, zNear, zFar);
+			return perspectiveFovLH_ZO(fov, width, height, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_LH_NO
-			return perspectiveFovLH_NO(fov, width, height, zNear, zFar);
+			return perspectiveFovLH_NO(fov, width, height, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_ZO
-			return perspectiveFovRH_ZO(fov, width, height, zNear, zFar);
+			return perspectiveFovRH_ZO(fov, width, height, zNear_, far_);
 #		elif GLM_CONFIG_CLIP_CONTROL == GLM_CLIP_CONTROL_RH_NO
 			return perspectiveFovRH_NO(fov, width, height, zNear, zFar);
 #		endif
@@ -522,7 +522,7 @@ namespace glm
 	GLM_FUNC_QUALIFIER mat<4, 4, T, defaultp> infinitePerspective(T fovy, T aspect, T zNear)
 	{
 #		if GLM_CONFIG_CLIP_CONTROL & GLM_CLIP_CONTROL_LH_BIT
-			return infinitePerspectiveLH(fovy, aspect, zNear);
+			return infinitePerspectiveLH(fovy, aspect, zNear_);
 #		else
 			return infinitePerspectiveRH(fovy, aspect, zNear);
 #		endif

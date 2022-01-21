@@ -1,11 +1,12 @@
 #include "TextRenderer.h"
 #include "../Scene.h"
 #include "../window/Window.h"
+#include "../components/Text.h"
 
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-TextRenderer::TextRenderer() : shader(), text() {
+TextRenderer::TextRenderer() : shader(), mesh() {
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         BOOST_LOG_TRIVIAL(error) << "Failed to init FreeType";
@@ -36,13 +37,27 @@ TextRenderer::~TextRenderer() {
 
 }
 
-void TextRenderer::renderText(const std::string& t, float x, float y, float scale, const glm::vec4& color) {
-    shader.start();
-    shader.setUniform("color", color);
-    shader.setUniform("texture", 0);
-    shader.setUniform("projection", glm::ortho(0.0f, Window::width, 0.0f, Window::height));
+void TextRenderer::render(const std::unique_ptr<Scene>& scene) {
+    glDisable(GL_DEPTH_TEST);
+    glActiveTexture(GL_TEXTURE0);
 
-    text.draw(a24, t, x, y, scale);
+    shader.start();
+    shader.setUniform("projection", glm::ortho(0.0f, Window::width, 0.0f, Window::height));
+    shader.setUniform("texture", 0);
+
+    a24->bind();
+
+    auto entities = scene->registry.view<const Text>();
+
+    for (auto [entity, text] : entities.each()) {
+        shader.setUniform("color", text.color);
+        mesh.draw(a24, text(), text.x < 0.0f ? text.x + Window::width : text.x, text.y < 0.0f ? text.y + Window::height : text.y, text.scale);
+    }
+
+    a24->unbind();
 
     shader.stop();
+
+    glEnable(GL_DEPTH_TEST);
 }
+

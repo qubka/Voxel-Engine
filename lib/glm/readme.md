@@ -528,7 +528,7 @@ glm::mat4 camera(float Translate, glm::vec2 const& Rotate)
 - Added ARM instruction set detection
 
 #### Improvements:
-- Removed assert for perspective with zFar < zNear #298
+- Removed assert for perspective with far_ < zNear_ #298
 - Added Visual Studio natvis support for vec1, quat and dualqual types
 - Cleaned up C++11 feature detections
 - Clarify GLM licensing
@@ -708,7 +708,7 @@ glm::mat4 camera(float Translate, glm::vec2 const& Rotate)
 - Fixed GTX_multiple for negative value
 - Removed GTX_ocl_type extension
 - Fixed post increment and decrement operators
-- Fixed perspective with zNear == 0 (#71)
+- Fixed perspective with zNear_ == 0 (#71)
 - Removed l-value swizzle operators
 - Cleaned up compiler detection code for unsupported compilers
 - Replaced C cast by C++ casts
@@ -767,7 +767,7 @@ glm::mat4 camera(float Translate, glm::vec2 const& Rotate)
 - Fixed CUDA warnings #86
 - Fixed GLM natvis for VC11 #82
 - Fixed GLM_GTX_multiple with negative values #79
-- Fixed glm::perspective when zNear is zero #71
+- Fixed glm::perspective when zNear_ is zero #71
 
 ---
 ### GLM 0.9.4.3 - 2013-03-20
