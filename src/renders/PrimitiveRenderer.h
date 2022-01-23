@@ -14,5 +14,4 @@ public:
     void render(const std::unique_ptr<Scene>& scene) override;
 };
 
-
 #endif //VOX_PRIMITIVERENDERER_H

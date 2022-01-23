@@ -79,9 +79,9 @@ void Model::processMesh(const aiScene* scene, const aiMesh* mesh) {
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
         if (textures.empty()) {
-            auto r = static_cast<unsigned char>(material.diffuse[0] * 255);
-            auto g = static_cast<unsigned char>(material.diffuse[1] * 255);
-            auto b = static_cast<unsigned char>(material.diffuse[2] * 255);
+            auto r = static_cast<uint8_t>(material.diffuse[0] * 255);
+            auto g = static_cast<uint8_t>(material.diffuse[1] * 255);
+            auto b = static_cast<uint8_tr>(material.diffuse[2] * 255);
             textures.push_back(std::make_shared<Texture>(r, g, b));
         }*/
     }

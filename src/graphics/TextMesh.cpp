@@ -56,15 +56,15 @@ void TextMesh::draw(const std::unique_ptr<Font>& font, const std::string& text, 
                 ty
             },
             {
-                px + w,
-                py,
-                tx + ox,
-                ty + oy
-            },
-            {
                 px,
                 py,
                 tx,
+                ty + oy
+            },
+            {
+                px + w,
+                py,
+                tx + ox,
                 ty + oy
             },
             {
@@ -75,15 +75,15 @@ void TextMesh::draw(const std::unique_ptr<Font>& font, const std::string& text, 
             },
             {
                 px + w,
-                py + h,
-                tx + ox,
-                ty
-            },
-            {
-                px + w,
                 py,
                 tx + ox,
                 ty + oy
+            },
+            {
+                px + w,
+                py + h,
+                tx + ox,
+                ty
             }
         };
 

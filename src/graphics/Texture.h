@@ -9,13 +9,12 @@ class Texture {
     aiTextureType aiType{aiTextureType_DIFFUSE};
 public:
     Texture(const std::filesystem::path& path, bool linear, bool clamp);
-    Texture(unsigned char r, unsigned char g, unsigned char b);
+    Texture(uint8_t r, uint8_t g, uint8_t b);
     ~Texture();
 
     void bind() const;
     void unbind() const;
 
-    uint32_t id() const;
     const std::filesystem::path& path() const;
     aiTextureType type() const;
 };

@@ -22,13 +22,9 @@ GLint glxGpuAvailMemory() {
     GLint curAvailMemKb = 0;
     glGetIntegerv(GL_GPU_MEM_INFO_CURRENT_AVAILABLE_MEM_NVX, &curAvailMemKb);
 
-#ifdef _WIN32
-    if (curAvailMemKb == 0 && wglGetGPUIDsAMD) {
+    if (curAvailMemKb == 0) {
         glGetIntegerv(GL_TEXTURE_FREE_MEMORY_ATI, &curAvailMemKb);
     }
-#elif defined(linux)
-
-#endif
 
     return curAvailMemKb;
 }

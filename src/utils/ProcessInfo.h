@@ -8,12 +8,12 @@
 class ProcessInfo
 {
 public:
-    ProcessInfo(unsigned int iProcessId);
+    ProcessInfo(unsigned int processId);
     ~ProcessInfo();
 
     unsigned int getProcessId();
     unsigned long long getProcessUptime();
-    double getProcessCPUUsage();
+    double getProcessCpuUsage();
     double getProcessMemoryUsed();
     unsigned long getProcessThreadCount();
 

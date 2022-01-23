@@ -8,6 +8,7 @@
 class MeshRenderer : public Renderer {
 private:
     Shader shader;
+    Texture texture;
 public:
     MeshRenderer();
     ~MeshRenderer();

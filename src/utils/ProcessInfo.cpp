@@ -11,9 +11,7 @@
 #define LINEBUFFLEN 2048
 #endif
 
-ProcessInfo::ProcessInfo(unsigned int iProcessId) {
-    processId = iProcessId;
-
+ProcessInfo::ProcessInfo(unsigned int processId) : processId(processId) {
 #ifdef _WIN32
     // get number of processors
 	SYSTEM_INFO lSysInfo;
@@ -122,7 +120,7 @@ unsigned long long ProcessInfo::getProcessUptime() {
     return lUptimeInSec;
 }
 
-double ProcessInfo::getProcessCPUUsage() {
+double ProcessInfo::getProcessCpuUsage() {
     double lCPUUsage = -1;
 #ifdef _WIN32
     HANDLE lProcessHandle = OpenProcess(PROCESS_QUERY_INFORMATION, FALSE, mProcessId);

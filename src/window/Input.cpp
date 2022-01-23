@@ -1,62 +1,11 @@
 #include "Input.h"
 #include "Window.h"
 
-bool Input::keys[];
-uint32_t Input::frames[];
-uint32_t Input::current;
-float Input::deltaX;
-float Input::deltaY;
-float Input::x;
-float Input::y;
-bool Input::started;
-bool Input::locked;
-
-#define MOUSE_BUTTONS 1024
-
-void cursorPositionCallback(GLFWwindow* window, double mouseX, double mouseY) {
-    auto x = static_cast<float>(mouseX);
-    auto y = static_cast<float>(mouseY);
-
-    if (Input::started) {
-        Input::deltaX += x - Input::x;
-        Input::deltaY += y - Input::y;
-    } else {
-        Input::started = true;
-    }
-
-    Input::x = x;
-    Input::y = y;
-}
-
-void mouseButtonCallback(GLFWwindow* window, int button, int action, int mode) {
-    int key = MOUSE_BUTTONS + button;
-    if (action == GLFW_PRESS) {
-        Input::keys[key] = true;
-        Input::frames[key] = Input::current;
-    } else if (action == GLFW_RELEASE) {
-        Input::keys[key] = false;
-        Input::frames[key] = Input::current;
-    }
-}
-
-void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
-    if (action == GLFW_PRESS) {
-        Input::keys[key] = true;
-        Input::frames[key] = Input::current;
-    } else if (action == GLFW_RELEASE) {
-        Input::keys[key] = false;
-        Input::frames[key] = Input::current;
-    }
-}
-
-void windowSizeCallback(GLFWwindow* window, int width, int height) {
-    glViewport(0, 0, width, height);
-    Window::setWidthAndHeight(width, height);
-}
-
-void windowMaximizeCallback(GLFWwindow* window, int maximized) {
-
-}
+bool Input::keys[]{};
+uint32_t Input::frames[]{};
+uint32_t Input::current{};
+glm::vec2 Input::delta{};
+glm::vec2 Input::position{};
 
 void Input::init() {
     GLFWwindow* window = Window::window;
@@ -65,6 +14,7 @@ void Input::init() {
     glfwSetCursorPosCallback(window, cursorPositionCallback);
     glfwSetWindowSizeCallback(window, windowSizeCallback);
     glfwSetWindowMaximizeCallback(window, windowMaximizeCallback);
+    //glfwSetScrollCallback
 }
 
 bool Input::getKey(int keycode) {
@@ -91,15 +41,49 @@ bool Input::getMouseButtonDown(int button) {
 
 void Input::update() {
     current++;
-    deltaX = 0;
-    deltaY = 0;
+    delta.x = 0;
+    delta.y = 0;
 }
 
-int Input::toggleCursor() {
-    locked = !locked;
-    return locked ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL;
+glm::vec2& Input::mousePosition() {
+    return position;
 }
 
-glm::vec2 Input::mousePosition() {
-    return { x, y };
+glm::vec2& Input::mouseDelta() {
+    return delta;
+}
+
+void Input::cursorPositionCallback(GLFWwindow* window, double mouseX, double mouseY) {
+    glm::vec2 mouse {mouseX, mouseY};
+    delta += mouse - position;
+    position = mouse;
+}
+
+void Input::mouseButtonCallback(GLFWwindow* window, int button, int action, int mode) {
+    int key = MOUSE_BUTTONS + button;
+    if (action == GLFW_PRESS) {
+        keys[key] = true;
+        frames[key] = current;
+    } else if (action == GLFW_RELEASE) {
+        keys[key] = false;
+        frames[key] = current;
+    }
+}
+
+void Input::keyCallback(GLFWwindow* window, int key, int scancode, int action, int mode) {
+    if (action == GLFW_PRESS) {
+        keys[key] = true;
+        frames[key] = current;
+    } else if (action == GLFW_RELEASE) {
+        keys[key] = false;
+        frames[key] = current;
+    }
+}
+
+void Input::windowSizeCallback(GLFWwindow* window, int width, int height) {
+    Window::setWidthAndHeight(width, height);
+}
+
+void Input::windowMaximizeCallback(GLFWwindow* window, int maximized) {
+
 }

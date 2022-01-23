@@ -1,7 +1,6 @@
 #ifndef VOX_MODEL_H
 #define VOX_MODEL_H
 
-class Vertex;
 class Texture;
 class Material;
 class Mesh;
@@ -13,10 +12,11 @@ class aiMaterial;
 
 #include <assimp/material.h>
 
+// https://github.com/triplepointfive/ogldev/blob/master/tutorial39/mesh.h
+
 class Model {
     std::filesystem::path directory;
     std::vector<std::shared_ptr<Texture>> texturesLoaded;
-    //std::vector<std::shared_ptr<Mesh<
 
     void processNode(const aiScene* scene, const aiNode* node);
     void processMesh(const aiScene* scene, const aiMesh* mesh);

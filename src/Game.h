@@ -21,9 +21,6 @@ public:
         return instance;
     }
 
-    static float elapsedTime;
-    static int framesPerSecond;
-
 private:
     std::unique_ptr<Scene> scene;
 

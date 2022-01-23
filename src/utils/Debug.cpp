@@ -1,6 +1,7 @@
 #include "Debug.h"
 #include "../Game.h"
 #include "../Scene.h"
+#include "../Time.h"
 #include "../renders/TextRenderer.h"
 #include "../graphics/PrimitiveMesh.h"
 #include "../components/Destroy.h"
@@ -16,9 +17,9 @@ void Debug::drawLine(const glm::vec3& start, const glm::vec3& end, float duratio
     auto& registry = Game::instance().defaultScene()->registry;
     auto entity = registry.create();
     registry.emplace<PrimitiveMesh>(entity, std::vector<glm::vec3>{start, end}, GL_LINES);
-    if (duration > 0.0f) {
+    /*if (duration > 0) {
         registry.emplace<Destroy>(entity, glfwGetTime() + duration);
-    }
+    }*/
 }
 
 void Debug::drawQuad(const glm::vec2& min, const glm::vec2& max, float z, float duration) {
@@ -33,9 +34,9 @@ void Debug::drawQuad(const glm::vec2& min, const glm::vec2& max, float z, float 
     };
 
     registry.emplace<PrimitiveMesh>(entity, vertices, GL_LINE_LOOP); // GL_QUADS removed
-    if (duration > 0.0f) {
-        registry.emplace<Destroy>(entity, glfwGetTime() + duration);
-    }
+    /*if (duration > 0) {
+        registry.emplace<Destroy>(entity, duration);
+    }*/
 }
 
 entt::entity Debug::createString(const std::string& text, float x, float y, float scale, const glm::vec4& color) {
@@ -47,21 +48,21 @@ entt::entity Debug::createString(const std::string& text, float x, float y, floa
     return entity;
 }
 
-void Debug::drawFrustum(const Frustum& f, float duration) {
-    glm::vec3 n1 = Geometry::intersectionPoint(f.getPlane(Frustum::TOP), f.getPlane(Frustum::LEFT), f.getPlane(Frustum::NEAR));
-    glm::vec3 n2 = Geometry::intersectionPoint(f.getPlane(Frustum::TOP), f.getPlane(Frustum::RIGHT), f.getPlane(Frustum::NEAR));
-    glm::vec3 n3 = Geometry::intersectionPoint(f.getPlane(Frustum::BOTTOM), f.getPlane(Frustum::LEFT), f.getPlane(Frustum::NEAR));
-    glm::vec3 n4 = Geometry::intersectionPoint(f.getPlane(Frustum::BOTTOM), f.getPlane(Frustum::RIGHT), f.getPlane(Frustum::NEAR));
+void Debug::drawFrustum(const Frustum& frustum, float duration) {
+    glm::vec3 n1 = Geometry::intersectionPoint(frustum[Frustum::TOP], frustum[Frustum::LEFT], frustum[Frustum::NEAR]);
+    glm::vec3 n2 = Geometry::intersectionPoint(frustum[Frustum::TOP], frustum[Frustum::RIGHT], frustum[Frustum::NEAR]);
+    glm::vec3 n3 = Geometry::intersectionPoint(frustum[Frustum::BOTTOM], frustum[Frustum::LEFT], frustum[Frustum::NEAR]);
+    glm::vec3 n4 = Geometry::intersectionPoint(frustum[Frustum::BOTTOM], frustum[Frustum::RIGHT], frustum[Frustum::NEAR]);
 
     Debug::drawLine(n1, n2, duration);
     Debug::drawLine(n2, n4, duration);
     Debug::drawLine(n3, n1, duration);
     Debug::drawLine(n3, n4, duration);
 
-    glm::vec f1 = Geometry::intersectionPoint(f.getPlane(Frustum::TOP), f.getPlane(Frustum::LEFT), f.getPlane(Frustum::FAR));
-    glm::vec f2 = Geometry::intersectionPoint(f.getPlane(Frustum::TOP), f.getPlane(Frustum::RIGHT), f.getPlane(Frustum::FAR));
-    glm::vec f3 = Geometry::intersectionPoint(f.getPlane(Frustum::BOTTOM), f.getPlane(Frustum::LEFT), f.getPlane(Frustum::FAR));
-    glm::vec f4 = Geometry::intersectionPoint(f.getPlane(Frustum::BOTTOM), f.getPlane(Frustum::RIGHT), f.getPlane(Frustum::FAR));
+    glm::vec f1 = Geometry::intersectionPoint(frustum[Frustum::TOP], frustum[Frustum::LEFT], frustum[Frustum::FAR]);
+    glm::vec f2 = Geometry::intersectionPoint(frustum[Frustum::TOP], frustum[Frustum::RIGHT], frustum[Frustum::FAR]);
+    glm::vec f3 = Geometry::intersectionPoint(frustum[Frustum::BOTTOM], frustum[Frustum::LEFT], frustum[Frustum::FAR]);
+    glm::vec f4 = Geometry::intersectionPoint(frustum[Frustum::BOTTOM], frustum[Frustum::RIGHT], frustum[Frustum::FAR]);
 
     Debug::drawLine(f1, f2, duration);
     Debug::drawLine(f2, f4, duration);

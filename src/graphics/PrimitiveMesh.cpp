@@ -1,6 +1,9 @@
 #include "PrimitiveMesh.h"
 
 PrimitiveMesh::PrimitiveMesh(std::vector<glm::vec3> v, GLuint mode) : vertices(std::move(v)), mode(mode) {
+    if (vertices.empty())
+        BOOST_LOG_TRIVIAL(error) << "Vertices data buffer is empty";
+
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
 

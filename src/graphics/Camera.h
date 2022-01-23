@@ -14,21 +14,14 @@ private:
     float yaw_{0};
     float pitch_{0};
     float speed_{1};
-    float fov_{45.0f};
+    float fov_{45};
     float far_{0.1};
-    float znear_{100.0};
-
-    float frustumTop{1};
-    float frustumBottom{1};
-    float frustumRight{1};
-    float frustumLeft{1};
+    float near_{100};
 
     void updateViewMatrix();
 public:
     Camera(float speed, float fov, float nearClip, float farClip);
     ~Camera();
-
-    [[maybe_unused]] static std::shared_ptr<Camera> main;
 
     void update();
 
@@ -46,8 +39,8 @@ public:
     float fov() const;
     float speed() const;
 
-    float nearClip() const;
-    float farClip() const;
+    float near() const;
+    float far() const;
 
     const glm::vec3& position() const;
     const glm::quat& rotation() const;
@@ -57,9 +50,6 @@ public:
 
     Ray screenPointToRay(const glm::vec2& pos) const;
     glm::vec3 screenToWorldPoint(const glm::vec2& pos) const;
-    void getClipCoordinates(float clipDist, float ratio, glm::vec3& topLeft, glm::vec3& topRight, glm::vec3& bottomLeft, glm::vec3& bottomRight) const;
-    void getNearClipCoordinates(glm::vec3& topLeft, glm::vec3& topRight, glm::vec3& bottomLeft, glm::vec3& bottomRight) const;
-    void getFarClipCoordinates(glm::vec3& topLeft, glm::vec3& topRight, glm::vec3& bottomLeft, glm::vec3& bottomRight) const;
 };
 
 #endif //VOX_CAMERA_H

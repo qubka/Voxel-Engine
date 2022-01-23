@@ -4,6 +4,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image_write.h"
 
+#define NUM_GLYPHS 128
+
 Font::Font(const FT_Face& face, int size) {
     FT_Set_Pixel_Sizes(face, 0, size);
     const auto& glyph = face->glyph;

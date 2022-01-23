@@ -7,12 +7,15 @@
 #include "graphics/Texture.h"
 #include "graphics/Mesh.h"
 #include "graphics/Vertex.h"
+
 #include "geometry/Ray.h"
+#include "geometry/Geometry.h"
 
 #include "components/Transform.h"
 #include "components/Tag.h"
 
 #include "delaunator.hpp"
+#include "geometry/Sphere.h"
 
 World::World(Scene* scene) : scene(scene), plane(vec3::forward, vec3::zero) {
 }
@@ -130,7 +133,7 @@ void World::convertCoordinates(double lon, double lat) {
 
 std::vector<double> World::genInnerVerts(const value& points) {
     std::vector<double> res;
-    res.reserve(points.GetArray().Size() * 3);
+    res.reserve(points.GetArray().Size() * 2);
 
     glm::dvec2 min {std::numeric_limits<double>::max()};
     glm::dvec2 max {std::numeric_limits<double>::lowest()};
@@ -200,6 +203,41 @@ void World::removeOuterTriangles(const value& points, delaunator::Delaunator& de
     delaunator.triangles = newTriangles;
 }
 
+bool World::isInsidePolygon(const value& points, const glm::dvec2& pos) {
+    bool inside = false;
+
+    const auto& p = points.GetArray();
+    for (size_t i = 0, j = p.Size() - 1; i < p.Size(); j = i++) {
+        const auto& ai = p[i];
+        const auto& aj = p[j];
+        const double xi = ai[0].GetDouble(), yi = ai[1].GetDouble();
+        const double xj = aj[0].GetDouble(), yj = aj[1].GetDouble();
+
+        bool intersect = ((yi > pos.y) != (yj > pos.y)) && (pos.x < (xj - xi) * (pos.y - yi) / (yj - yi) + xi);
+        if (intersect) inside = !inside;
+    }
+
+    return inside;
+}
+
+bool World::isInsideTriangle(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, const glm::vec2& p) {
+    glm::vec2 p0 {c - a};
+    glm::vec2 p1 {b - a};
+    glm::vec2 p2 {p - a};
+
+    float dot00 = glm::dot(p0, p0);
+    float dot01 = glm::dot(p0, p1);
+    float dot02 = glm::dot(p0, p2);
+    float dot11 = glm::dot(p1, p1);
+    float dot12 = glm::dot(p1, p2);
+
+    float invDen = 1 / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDen;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDen;
+
+    return (u >= 0) && (v >= 0) && (u + v < 1);
+}
+
 rapidjson::Document World::readJsonDocument(const std::filesystem::path& path) {
     std::ifstream file(path);
     if(!file.is_open()) {
@@ -219,7 +257,6 @@ void World::createMesh(const Properties& properties, const std::vector<size_t>& 
     vertices.reserve(values.size());
     std::vector<GLuint> indices;
     indices.reserve(triangles.size());
-    std::vector<std::shared_ptr<Texture>> textures = { std::make_shared<Texture>(rand()%256, rand()%256, rand()%256) };
 
     auto& registry = scene->registry;
     auto entity = registry.create();
@@ -254,10 +291,18 @@ void World::createMesh(const Properties& properties, const std::vector<size_t>& 
         //Debug::drawQuad(min, max, 0.1f, 10.0f);
     }
 
-    registry.emplace<Mesh>(entity, vertices, indices, textures);
+    glm::vec3 center = 0.5f * (bmin + bmax);
+    float maxDistance = glm::distance2(center, vertices[0].position);
+    for (size_t i = 1; i < vertices.size(); ++i) {
+        float dist = glm::distance2(center, vertices[i].position);
+        if (dist > maxDistance)
+            maxDistance = dist;
+    }
+
+    registry.emplace<Mesh>(entity, vertices, indices);
     registry.emplace<Transform>(entity);
     registry.emplace<Tag>(entity, properties.name);
-    //registry.emplace<AABB>(entity, bmin, bmax);
+    registry.emplace<Sphere>(entity, center, std::sqrt(maxDistance));
 
     values.clear();
 }
@@ -270,61 +315,19 @@ void World::createLine() {
     BOOST_LOG_TRIVIAL(error) << "Cant create line";
 }
 
-bool World::isInsidePolygon(const value& points, const glm::dvec2& pos) {
-    bool inside = false;
-
-    const auto& p = points.GetArray();
-    for (size_t i = 0, j = p.Size() - 1; i < p.Size(); j = i++) {
-        const auto& ai = p[i];
-        const auto& aj = p[j];
-        const double xi = ai[0].GetDouble(), yi = ai[1].GetDouble();
-        const double xj = aj[0].GetDouble(), yj = aj[1].GetDouble();
-
-        bool intersect = ((yi > pos.y) != (yj > pos.y)) && (pos.x < (xj - xi) * (pos.y - yi) / (yj - yi) + xi);
-        if (intersect) inside = !inside;
-    }
-
-    return inside;
-}
-
-bool World::isInsideTriangle(const Mesh& mesh, GLuint i, const glm::vec2& p) {
-    const auto& t0 = mesh.indices[i + 0];
-    const auto& t1 = mesh.indices[i + 1];
-    const auto& t2 = mesh.indices[i + 2];
-
-    auto a = glm::vec2(mesh.vertices[t0].position);
-    auto b = glm::vec2(mesh.vertices[t1].position);
-    auto c = glm::vec2(mesh.vertices[t2].position);
-
-    glm::vec2 v0 {c - a};
-    glm::vec2 v1 {b - a};
-    glm::vec2 v2 {p - a};
-
-    float dot00 = glm::dot(v0, v0);
-    float dot01 = glm::dot(v0, v1);
-    float dot02 = glm::dot(v0, v2);
-    float dot11 = glm::dot(v1, v1);
-    float dot12 = glm::dot(v1, v2);
-
-    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-    return (u >= 0.0f) && (v >= 0.0) && (u + v < 1.0f);
-}
-
 std::optional<entt::entity> World::intersectObjects(const Ray& ray) {
     float rayDistance;
     if (plane.rayCast(ray, rayDistance)) {
         auto hit = ray.getPoint(rayDistance);
-       // Debug::drawLine(ray.origin, hit, 5.0f);
+       // Debug::drawLine(ray.origin, hit, 5);
 
         std::vector<data> res;
         rtree.query(geo::index::nearest(point(hit.x, hit.y), 5), std::back_inserter(res));
 
         for (const auto& [box, entity, index] : res) {
             const auto& mesh = scene->registry.get<Mesh>(entity);
-            if (isInsideTriangle(mesh, index, hit)) {
+
+            if (isInsideTriangle(mesh[index], mesh[index+1], mesh[index+2], hit)) {
                 return std::optional<entt::entity>{entity};
             }
         }
@@ -332,7 +335,6 @@ std::optional<entt::entity> World::intersectObjects(const Ray& ray) {
 
     return std::nullopt;
 }
-
 
 /*
  * Properties extraction
@@ -367,4 +369,6 @@ World::Properties::Properties(const value& properties) {
     } else if (properties.HasMember("NAME_0")) {
         name = properties["NAME_0"].GetString(); removeAccented(name);
     }
+
+    textures = { std::make_shared<Texture>(rand()%256, rand()%256, rand()%256) };
 }

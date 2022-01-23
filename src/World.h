@@ -32,7 +32,7 @@ class World {
     geo::index::rtree<data, geo::index::quadratic<16>> rtree;
     Plane plane;
 
-    const int TRIANGULATION_DENSITY = 5;
+    const int TRIANGULATION_DENSITY = 1;
     static rapidjson::Document readJsonDocument(const std::filesystem::path& path);
 
     void processGeometry(const value& properties, const value& geometries);
@@ -40,12 +40,14 @@ class World {
     void convertCoordinates(double lon, double lat);
     std::vector<double> genInnerVerts(const value& points);
     void removeOuterTriangles(const value& points, delaunator::Delaunator& delaunator);
+
     bool isInsidePolygon(const value& points, const glm::dvec2& pos);
-    bool isInsideTriangle(const Mesh& mesh, uint32_t index, const glm::vec2& pos);
+    bool isInsideTriangle(const glm::vec2& a, const glm::vec2& b, const glm::vec2& c, const glm::vec2& p);
 
     struct Properties {
         std::string id;
         std::string name;
+        std::vector<std::shared_ptr<Texture>> textures;
         explicit Properties(const value& properties);
     };
 

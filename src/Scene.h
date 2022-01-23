@@ -2,19 +2,15 @@
 #define VOX_SCENE_H
 
 #include "utils/ProcessInfo.h"
-
-class Camera;
-class Entity;
-class World;
+#include "voxels/Terrain.h"
+#include "graphics/Camera.h"
 
 class Scene {
 public:
     entt::registry registry;
-    std::shared_ptr<Camera> camera;
-    std::unique_ptr<World> world;
-
+    Camera camera;
+    Terrain terrain;
     ProcessInfo info;
-
     entt::entity infoText;
 
     Scene();

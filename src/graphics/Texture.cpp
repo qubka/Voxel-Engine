@@ -44,14 +44,8 @@ Texture::Texture(const std::filesystem::path& path, bool linear, bool clamp) : f
     std::cout << glGetError() << std::endl;
 }
 
-Texture::Texture(unsigned char r, unsigned char g, unsigned char b) {
-    unsigned char data[] = {r, g, b};
-
-    /*for (int i = 0; i < 12; i += 3) {
-        data[i + 0] = r;
-        data[i + 1] = g;
-        data[i + 2] = b;
-    }*/
+Texture::Texture(uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t data[] = {r, g, b};
 
     glGenTextures(1, &textureId);
     glBindTexture(GL_TEXTURE_2D, textureId);
@@ -75,10 +69,6 @@ void Texture::bind() const {
 
 void Texture::unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-uint32_t Texture::id() const {
-    return textureId;
 }
 
 const std::filesystem::path& Texture::path() const {

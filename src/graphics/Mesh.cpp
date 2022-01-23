@@ -2,7 +2,10 @@
 #include "Shader.h"
 #include "Texture.h"
 
-Mesh::Mesh(std::vector<Vertex> v, std::vector<GLuint> i, std::vector<std::shared_ptr<Texture>> t) : vertices(std::move(v)), indices(std::move(i)), textures(std::move(t)) {
+Mesh::Mesh(std::vector<Vertex> v, std::vector<GLuint> i) : vertices(std::move(v)), indices(std::move(i)) {
+    if (vertices.empty() || indices.empty())
+        BOOST_LOG_TRIVIAL(error) << "Vertices/Indices data buffer is empty";
+
     glGenVertexArrays(1, &vao);
     glGenBuffers(1, &vbo);
     glGenBuffers(1, &ebo);
@@ -35,44 +38,11 @@ Mesh::~Mesh() {
 }
 
 void Mesh::draw(const Shader& shader) const {
-    unsigned char diffuseNr = 0;
-    unsigned char specularNr = 0;
-    unsigned char normalNr = 0;
-    unsigned char heightNr = 0;
-
-    for (int i = 0; i < textures.size(); i++) {
-        glActiveTexture(GL_TEXTURE0 + i);
-        const auto& texture = textures[i];
-
-        std::string name;
-        switch (texture->type()) {
-            case aiTextureType_DIFFUSE:
-                name = "diffuse" + std::to_string(diffuseNr++);
-                break;
-            case aiTextureType_SPECULAR:
-                name = "specular" + std::to_string(specularNr++);
-                break;
-            case aiTextureType_NORMALS:
-                name = "normal" + std::to_string(normalNr++);
-                break;
-            case aiTextureType_HEIGHT:
-                name = "height" + std::to_string(heightNr++);
-                break;
-            default:
-                BOOST_LOG_TRIVIAL(error) << "Unknown texture type";
-                continue;
-        }
-
-        shader.setUniform(name, i);
-        texture->bind();
-    }
-
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
+}
 
-    for (const auto& texture : textures) {
-        texture->unbind();
-    }
-    glActiveTexture(GL_TEXTURE0);
+const glm::vec3& Mesh::operator[](size_t i) const {
+    return vertices[indices[i]].position;
 }

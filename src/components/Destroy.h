@@ -2,7 +2,7 @@
 #define VOX_DESTROY_H
 
 struct Destroy {
-    double time{0};
+    float time{};
 };
 
 #endif //VOX_DESTROY_H

@@ -51,7 +51,12 @@ void TextRenderer::render(const std::unique_ptr<Scene>& scene) {
 
     for (auto [entity, text] : entities.each()) {
         shader.setUniform("color", text.color);
-        mesh.draw(a24, text(), text.x < 0.0f ? text.x + Window::width : text.x, text.y < 0.0f ? text.y + Window::height : text.y, text.scale);
+        mesh.draw(a24, text(), text.x < 0 ? text.x + Window::width : text.x, text.y < 0 ? text.y + Window::height : text.y, text.scale);
+
+        drawCalls++;
+        totalCalls++;
+
+        totalVertices += 6 * sizeof(glm::vec4);
     }
 
     a24->unbind();

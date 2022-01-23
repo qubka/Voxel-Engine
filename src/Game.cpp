@@ -6,17 +6,16 @@
 #include "Scene.h"
 #include "Renderer.h"
 #include "System.h"
+#include "Time.h"
 
 #include "renders/MeshRenderer.h"
 #include "renders/PrimitiveRenderer.h"
 #include "renders/TextRenderer.h"
 
 #include "systems/TransformSystem.h"
-#include "systems/DebugSystem.h"
 #include "systems/DestroySystem.h"
-
-float Game::elapsedTime;
-int Game::framesPerSecond;
+#include "systems/CullingSystem.h"
+#include "systems/ChunkSystem.h"
 
 Game::Game() {
 }
@@ -32,7 +31,8 @@ void Game::init() {
 
     // Create systems
     systems.push_back(std::make_shared<TransformSystem>());
-    systems.push_back(std::make_shared<DebugSystem>());
+    systems.push_back(std::make_shared<CullingSystem>());
+    systems.push_back(std::make_shared<ChunkSystem>());
     systems.push_back(std::make_shared<DestroySystem>());
 
     scene = std::make_unique<Scene>();
@@ -44,35 +44,23 @@ Game::~Game() {
 }
 
 void Game::run() {
-    double previousTime = glfwGetTime();
-    //double elapsedTime = 0.0;
-    double frameTime = 0.0;
-    int frameCount = 0;
+    Time::init();
 
     while (!Window::isShouldClose()) {
-        double currentTime = glfwGetTime();
-        elapsedTime = static_cast<float>(currentTime - previousTime);
-        previousTime = currentTime;
-
-        frameCount++;
-        if (currentTime - frameTime >= 1.0) {
-            framesPerSecond = frameCount;
-            frameCount = 0;
-            frameTime = currentTime;
-        }
-
         update();
         render();
     }
 }
 
 void Game::update() {
+    Time::update();
+
     if (Input::getKeyDown(GLFW_KEY_ESCAPE)) {
         Window::setShouldClose(true);
     }
 
     if (Input::getKeyDown(GLFW_KEY_TAB)) {
-        Window::setCursorMode(Input::toggleCursor());
+        Window::toggleCursor();
     }
 
     if (Input::getKeyDown(GLFW_KEY_GRAVE_ACCENT)) {
